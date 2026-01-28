@@ -1,0 +1,65 @@
+name: Docker Build and Push
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        description: 'GitHub Container Registryに登録するイメージ名'
+        required: true
+        type: string
+      tag_name:
+        description: 'イメージのタグ (例: latest, v1.0)'
+        required: true
+        type: string
+      directory_path:
+        description: 'Dockerfileが存在するディレクトリパス (ビルドコンテキスト)'
+        required: false
+        type: string
+        default: '.'
+      platforms:
+        description: '対応プラットフォーム (例: linux/amd64,linux/arm64)'
+        required: false
+        type: string
+        default: 'linux/amd64' # デフォルトは従来通りamd64のみ
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # QEMUエミュレーターのセットアップ（ARMなど異なるアーキテクチャをビルドするために必須）
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ inputs.image_name }}
+          tags: |
+            type=raw,value=${{ inputs.tag_name }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ inputs.directory_path }}
+          platforms: ${{ inputs.platforms }} # ここでプラットフォームを指定
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ inputs.tag_name }}
+          labels: ${{ steps.meta.outputs.labels }}
