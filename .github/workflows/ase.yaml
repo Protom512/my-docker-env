@@ -1,0 +1,19 @@
+name: ASE Docker Build Workflow
+
+on:
+  # 定期実行スケジュールの設定 (例: 毎日日本時間の午前9時に実行)
+  schedule:
+    - cron: '0 0 1 * *' 
+  # 手動実行も可能にする場合（任意）
+  workflow_dispatch:
+
+jobs:
+  call-build-workflow:
+    # 上記で作成した再利用可能なワークフローを呼び出す
+    uses: ./.github/workflows/docker-build-push.yml
+    with:
+      # ここでパラメータを指定します
+      image_name: 'ase'         # イメージ名
+      tag_name: '16'                 # タグ名
+      directory_path: './ase'   # Dockerfileのあるディレクトリパス
+      dockerfile_path: './Dockerfile' # デフォルトから変更する場合のみ指定
