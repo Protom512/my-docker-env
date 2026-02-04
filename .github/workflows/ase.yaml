@@ -16,4 +16,4 @@ jobs:
       image_name: 'ase'         # イメージ名
       tag_name: '16'                 # タグ名
       directory_path: './ase'   # Dockerfileのあるディレクトリパス
-      # dockerfile_path: './Dockerfile' # デフォルトから変更する場合のみ指定
+      dockerfile_path: './Dockerfile' # デフォルトから変更する場合のみ指定
