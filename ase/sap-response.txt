@@ -1,0 +1,38 @@
+# Tue Feb 03 05:04:37 GMT 2026
+# Replay feature output
+# ---------------------
+# This file was built by the Replay feature of InstallAnywhere.
+# It contains variables that were set by Panels, Consoles or Custom Code.
+
+
+
+#Validate Response File
+#----------------------
+RUN_SILENT=true
+
+#Choose Install Folder
+#---------------------
+USER_INSTALL_DIR=/opt/sap
+
+#Install older version
+#---------------------
+INSTALL_OLDER_VERSION=false
+
+#Choose Install Set
+#------------------
+CHOSEN_FEATURE_LIST=fase_srv,fase_add_lm,fopen_client,fesql_c_lang,fesql_cobol_lang,fxa,fodbcl,fconn_add_lm,fjconnect161,fdbisql,fsysam_util,fsysam_server,fconn_python,fconn_perl,fconn_php,fase_hadr,fase_amc
+CHOSEN_INSTALL_FEATURE_LIST=fase_srv,fase_add_lm,fopen_client,fesql_c_lang,fesql_cobol_lang,fxa,fodbcl,fconn_add_lm,fjconnect161,fdbisql,fsysam_util,fsysam_server,fconn_python,fconn_perl,fconn_php,fase_hadr,fase_amc
+CHOSEN_INSTALL_SET=Full
+
+#SAP Host Agent
+#--------------
+INSTALL_SAP_HOST_AGENT=FALSE
+
+#Choose Product License Type
+#---------------------------
+SYBASE_PRODUCT_LICENSE_TYPE=evaluate
+
+#Install
+#-------
+-fileOverwrite_/opt/sap/sybuninstall/ASESuite/uninstall.lax=Yes
+
