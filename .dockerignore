@@ -1,0 +1,38 @@
+# Git files
+.git
+.gitignore
+.github
+
+# Documentation
+README.md
+WHITEBOARD.md
+EVOLVER_LOG.md
+*.md
+
+# Development files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Test files
+tests/
+Makefile
+
+# CI/CD
+.devcontainer
+
+# Claude specific
+claude-*.log
+claude-*.cmd
+claude-*.ps1
+claude_code_prompt.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
