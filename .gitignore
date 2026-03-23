@@ -1,0 +1,43 @@
+# Environment files
+.env
+.env.local
+
+# Temporary files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test artifacts
+test-results/
+coverage/
+
+# Build artifacts
+dist/
+build/
+
+# Node modules (if any JS tools are used)
+node_modules/
+
+# Python artifacts (if any Python tools are used)
+__pycache__/
+*.py[cod]
+*.so
+.Python
+venv/
+
+# Claude specific
+WHITEBOARD.md
+EVOLVER_LOG.md
+todo_scan.txt
+claude-*.log
+claude-*.cmd
+claude-*.ps1
+claude_code_prompt.md
