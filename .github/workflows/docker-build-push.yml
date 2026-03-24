@@ -1,6 +1,32 @@
 name: Docker Build and Push
 
 on:
+  workflow_dispatch:
+    inputs:
+      image_name:
+        description: 'GitHub Container Registryに登録するイメージ名'
+        required: true
+        type: string
+        default: 'ase-image'
+      tag_name:
+        description: 'イメージのタグ (例: latest, v1.0)'
+        required: true
+        type: string
+        default: 'latest'
+      directory_path:
+        description: 'Dockerfileが存在するディレクトリパス (ビルドコンテキスト)'
+        required: false
+        type: string
+        default: '.'
+      platforms:
+        description: '対応プラットフォーム (例: linux/amd64,linux/arm64)'
+        required: false
+        type: choice
+        options:
+          - linux/amd64
+          - linux/arm64
+          - linux/amd64,linux/arm64
+        default: 'linux/amd64'
   workflow_call:
     inputs:
       image_name:
