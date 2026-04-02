@@ -13,6 +13,10 @@ on:
         required: false
         type: string
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build-ase:
     runs-on: ubuntu-latest
