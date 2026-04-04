@@ -152,10 +152,10 @@ sqlsrv.server_name: ${ASE_DS_NAME}
 sqlsrv.sa_login: sa
 sqlsrv.sa_password: ${ASE_SA_PASSWORD}
 sqlsrv.default_language: ${ASE_LANGUAGE}
-sqlsrv.language_install_list: us_english,${ASE_LANGUAGE}
+sqlsrv.language_install_list: us_english,$(if [ "${ASE_LANGUAGE}" != "us_english" ]; then echo "${ASE_LANGUAGE}"; fi)
 #sqlsrv.language_remove_list: spanish
 sqlsrv.default_characterset: ${ASE_CHARSET}
-sqlsrv.characterset_install_list: ${ASE_CHARSET},sjis,eucjis
+sqlsrv.characterset_install_list: ${ASE_CHARSET}
 sqlsrv.characterset_remove_list: USE_DEFAULT
 sqlsrv.sort_order: ${ASE_SORT}
 
