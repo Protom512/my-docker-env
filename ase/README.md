@@ -10,7 +10,7 @@ This Docker image provides SAP ASE 16 (formerly Sybase ASE) with multi-stage bui
 
 - **Multi-stage build**: Optimized image size using multi-stage Docker build
 - **Configurable**: Environment variables for easy customization including language, charset, and sort order
-- **Production-ready**: Proper error handling and health checks
+- **Production-ready**: Proper error handling
 - **Tested**: Comprehensive integration tests included
 
 ## Quick Start
@@ -31,6 +31,8 @@ To build with custom system language (build-time argument):
 ```bash
 docker build -t ase:latest --build-arg LANG=en_US.utf8 ./ase
 ```
+
+> **Note**: The `make build` target does not currently pass build-args. To build with a custom system language, you must use the `docker build` command directly as shown above. The Makefile could be extended to support build-args in the future.
 
 ### Run the Container
 

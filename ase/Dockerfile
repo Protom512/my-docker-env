@@ -36,4 +36,4 @@ COPY --chown=sybase --from=installer /opt/sap/locales /opt/sap/locales
 COPY --chown=sybase --from=installer /opt/sap/config /opt/sap/config
 COPY --chown=sybase --from=installer /opt/sap/collate /opt/sap/collate
 ADD  entrypoint.sh /opt/sap/
-CMD ["/bin/bash","/opt/sap/entrypoint.sh"]
+CMD ["/bin/bash", "/opt/sap/entrypoint.sh"]
