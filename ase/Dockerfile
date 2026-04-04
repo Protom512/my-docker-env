@@ -18,7 +18,8 @@ RUN /opt/tmp/setup.bin -i silent \
 RUN touch /opt/sap/interfaces
 RUN rm -rf /opt/sap/ASE-16_1/bin/diagserver  /opt/sap/sybuninstall /opt/sap/ASE-16_1/sample/ /opt/sap/ASE-16_1/symlib/ /opt/sap/ASE*/**/*upgrade
 FROM registry.access.redhat.com/ubi9/ubi-minimal:latest as base
-ENV LANG=ja_JP.utf8
+ARG LANG=ja_JP.utf8
+ENV LANG=${LANG}
 #USER sybase
 WORKDIR /opt/sap
 RUN microdnf install -y libaio pam

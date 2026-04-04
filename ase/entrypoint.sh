@@ -28,6 +28,11 @@ export ASE_DATA_PATH=${ASE_DATA_PATH:-${ASE_INSTALL_PATH}/data}
 # Maximum time to wait for ASE startup (seconds)
 WAIT_SEC="${WAIT_SEC:-60}"
 
+# ASE configuration: language, charset, sort order
+export ASE_LANGUAGE=${ASE_LANGUAGE:-japanese}
+export ASE_CHARSET=${ASE_CHARSET:-utf8}
+export ASE_SORT=${ASE_SORT:-USE_DEFAULT}
+
 # Logging functions
 log_info() {
     echo "[INFO] $*"
@@ -105,9 +110,9 @@ sqlsrv.master_device_physical_name: ${ASE_DATA_PATH}/master.dat
 sqlsrv.master_device_size: 384
 sqlsrv.master_database_size: 300
 sqlsrv.errorlog: ${ASE_INSTALL_PATH}/${SYBASE_ASE}/install/${ASE_DS_NAME}.log
-sqlsrv.sort_order:	USE_DEFAULT
-sqlsrv.default_characterset:	utf8
-sqlsrv.default_language:	japanese
+sqlsrv.sort_order:	${ASE_SORT}
+sqlsrv.default_characterset:	${ASE_CHARSET}
+sqlsrv.default_language:	${ASE_LANGUAGE}
 sqlsrv.do_upgrade: no
 sqlsrv.sybsystemprocs_device_physical_name: ${ASE_DATA_PATH}/sysprocs.dat
 sqlsrv.sybsystemprocs_device_size: 184
@@ -135,24 +140,24 @@ if ! srvbuildres -r /tmp/sap-sqlbuild-res 2>&1; then
     exit 1
 fi
 
-cat <<EOF > /tmp/sqlloc-res 
+cat <<EOF > /tmp/sqlloc-res
 sybinit.release_directory: USE_DEFAULT
 sqlsrv.server_name: ${ASE_DS_NAME}
 sqlsrv.sa_login: sa
 sqlsrv.sa_password: ${ASE_SA_PASSWORD}
-#sqlsrv.default_language: japanese
-sqlsrv.language_install_list: us_english,japanese
+sqlsrv.default_language: ${ASE_LANGUAGE}
+sqlsrv.language_install_list: us_english,${ASE_LANGUAGE}
 #sqlsrv.language_remove_list: spanish
-#sqlsrv.default_characterset: utf8
-sqlsrv.characterset_install_list: utf8,sjis,eucjis
+sqlsrv.default_characterset: ${ASE_CHARSET}
+sqlsrv.characterset_install_list: ${ASE_CHARSET},sjis,eucjis
 sqlsrv.characterset_remove_list: USE_DEFAULT
-sqlsrv.sort_order: USE_DEFAULT
+sqlsrv.sort_order: ${ASE_SORT}
 
 # An example sqlloc resource file...
 # sybinit.release_directory: USE_DEFAULT
 # sqlsrv.server_name: PUT_YOUR_SERVER_NAME_HERE
 # sqlsrv.sa_login: sa
-# sqlsrv.sa_password: 
+# sqlsrv.sa_password:
 # sqlsrv.default_language: french
 # sqlsrv.language_install_list: spanish,german
 # sqlsrv.language_remove_list: USE_DEFAULT
@@ -160,7 +165,7 @@ sqlsrv.sort_order: USE_DEFAULT
 # sqlsrv.characterset_install_list: mac,cp850
 # sqlsrv.characterset_remove_list: USE_DEFAULT
 # "sqlsrv.sort_order" can be sort order name (dictionary_cp437) or file name (dictionary.srt)
-# sqlsrv.sort_order: dictionary_cp437 
+# sqlsrv.sort_order: dictionary_cp437
 EOF
 # Configure locales and character sets
 if ! sqllocres -r /tmp/sqlloc-res 2>&1; then
