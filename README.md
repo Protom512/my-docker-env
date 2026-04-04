@@ -10,7 +10,7 @@ This project provides Dockerized environments for development and testing purpos
 
 ## Project Structure
 
-```
+```text
 .
 ├── .devcontainer/          # VS Code dev container configurations
 │   └── devcontainer.json   # VS Code dev container settings
