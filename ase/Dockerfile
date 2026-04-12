@@ -35,4 +35,5 @@ COPY --chown=sybase --from=installer /opt/sap/locales /opt/sap/locales
 COPY --chown=sybase --from=installer /opt/sap/config /opt/sap/config
 COPY --chown=sybase --from=installer /opt/sap/collate /opt/sap/collate
 ADD  entrypoint.sh /opt/sap/
+RUN mkdir -p /docker-entrypoint-initdb.d
 CMD ["/opt/sap/entrypoint.sh"]
