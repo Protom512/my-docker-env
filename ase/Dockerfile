@@ -1,15 +1,17 @@
-FROM registry.access.redhat.com/ubi9/ubi:latest as base
-RUN dnf install -y shadow-utils  tar gzip && useradd sybase && mkdir /opt/sap
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest AS base
+RUN microdnf install -y shadow-utils  tar gzip && useradd sybase && mkdir /opt/sap
 
-FROM   base as installer
+FROM   base AS source
 WORKDIR /tmp
 RUN set -x \
- && curl -OLS https://d1cuw2q49dpd0p.cloudfront.net/ASE16/Current/ASE_Suite.linuxamd64.tgz \
- && mkdir -p /opt/tmp/ \
- && tar xfz ASE_Suite.linuxamd64.tgz -C /opt/tmp/ \
- && rm -rf ASE_Suite.linuxamd64.tgz
+    && curl -OLS https://d1cuw2q49dpd0p.cloudfront.net/ASE16/Current/ASE_Suite.linuxamd64.tgz \
+    && mkdir -p /opt/tmp/ \
+    && tar xfz ASE_Suite.linuxamd64.tgz -C /opt/tmp/ \
+    && rm -rf ASE_Suite.linuxamd64.tgz
+FROM busybox  AS version
+copy --from=source /opt/tmp/archives/version.txt /
 
-
+FROM source AS installer
 ADD sap-response.txt /tmp/
 RUN /opt/tmp/setup.bin -i silent \
     -f /tmp/sap-response.txt \
@@ -17,7 +19,7 @@ RUN /opt/tmp/setup.bin -i silent \
     -DRUN_SILENT=true
 RUN touch /opt/sap/interfaces
 RUN rm -rf /opt/sap/ASE-16_1/bin/diagserver  /opt/sap/sybuninstall /opt/sap/ASE-16_1/sample/ /opt/sap/ASE-16_1/symlib/ /opt/sap/ASE*/**/*upgrade
-FROM registry.access.redhat.com/ubi9/ubi-minimal:latest as base
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest 
 ARG LANG=ja_JP.utf8
 ENV LANG=${LANG}
 #USER sybase
