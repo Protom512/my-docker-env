@@ -82,6 +82,7 @@ test_container_starts() {
         --name "${CONTAINER_NAME}" \
         -p "${ASE_PORT}:5000" \
         -e ASE_SA_PASSWORD="${ASE_SA_PASSWORD}" \
+        -e ASE_DS_NAME="${ASE_DS_NAME}" \
         "${IMAGE_NAME}:${IMAGE_TAG}"; then
         log_error "Failed to start container"
         return 1

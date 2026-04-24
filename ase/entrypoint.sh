@@ -54,7 +54,7 @@ isql_cmd() {
     # --retserverror: Return server error codes
     # -b: Exit on error (batch mode)
     # -w: Output width
-    isql --retserverror -S "${ASE_DS_NAME}" -Usa -P "${ASE_SA_PASSWORD}" -D "${ASE_DB}" -w 1000 "$@"
+    isql --retserverror -b -S "${ASE_DS_NAME}" -Usa -P "${ASE_SA_PASSWORD}" -D "${ASE_DB}" -w 1000 "$@"
 }
 
 # Wait for ASE server to be ready
@@ -66,7 +66,7 @@ wait_for_ase() {
     log_info "Waiting for ASE server to be ready (max ${max_wait}s)..."
 
     while [ ${elapsed} -lt ${max_wait} ]; do
-        if isql -S "${ASE_DS_NAME}" -Usa -P "${ASE_SA_PASSWORD}" -D "${ASE_DB}" <<-SQL 2>/dev/null
+        if isql_cmd <<-SQL 2>/dev/null
 SELECT 1
 GO
 SQL
@@ -101,7 +101,7 @@ process_init_files() {
     count=$(echo "${files}" | wc -l)
     log_info "Processing ${count} initialization file(s) from ${init_dir}..."
 
-    echo "${files}" | while IFS= read -r f; do
+    while IFS= read -r f; do
         case "$f" in
             *.sh)
                 if [ -x "$f" ]; then
@@ -120,7 +120,7 @@ process_init_files() {
                 fi
                 ;;
         esac
-    done
+    done <<< "${files}"
 }
 
 # Ensure required directories and files exist
@@ -227,7 +227,7 @@ EOF
 
     # Shutdown server after initial configuration
     log_info "Shutting down server after initial configuration..."
-    if ! isql -S "${ASE_DS_NAME}" -Usa -P "${ASE_SA_PASSWORD}" -D "${ASE_DB}" <<SQL
+    if ! isql_cmd <<SQL
 use master
 go
 shutdown
@@ -240,7 +240,7 @@ SQL
 
     log_info "Waiting for server to stop..."
     shutdown_wait=0
-    while isql -S "${ASE_DS_NAME}" -Usa -P "${ASE_SA_PASSWORD}" -D "${ASE_DB}" <<-SQL 2>/dev/null
+    while isql_cmd <<-SQL 2>/dev/null
 SELECT 1
 GO
 SQL
