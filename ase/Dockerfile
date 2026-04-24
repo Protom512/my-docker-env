@@ -9,7 +9,7 @@ RUN set -x \
     && tar xfz ASE_Suite.linuxamd64.tgz -C /opt/tmp/ \
     && rm -rf ASE_Suite.linuxamd64.tgz
 FROM busybox  AS version
-copy --from=source /opt/tmp/archives/version.txt /
+COPY --from=source /opt/tmp/archives/version.txt /
 
 FROM source AS installer
 ADD sap-response.txt /tmp/
