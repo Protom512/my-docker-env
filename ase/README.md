@@ -80,10 +80,47 @@ docker run -d \
 | `ASE_DB` | Default database | `master` |
 | `ASE_HOST` | Default hostname | `localhost` |
 | `ASE_DATA_PATH` | Data directory path | `$SYBASE/data` |
-| `ASE_LANGUAGE` | ASE default language | `japanese` |
+| `ASE_LANGUAGE` | ASE default language | `us_english` |
 | `ASE_CHARSET` | ASE default character set | `utf8` |
-| `ASE_SORT` | ASE sort order | `USE_DEFAULT` |
-| `WAIT_SEC` | Maximum wait time for ASE startup (seconds) | `60` |
+| `ASE_SORT_ORDER` | ASE sort order | `binary` |
+| `ASE_MAX_MEMORY_MB` | Memory cap handed to srvbuildres (MB) | `2048` |
+| `WAIT_SEC` | Cold-start / connect timeout (seconds) | `120` |
+| `SHUTDOWN_WAIT_SEC` | Graceful shutdown timeout (seconds) | `60` |
+| `SQLLOCRES_WAIT_SEC` | sqllocres post-restart wait budget (seconds) | `180` |
+| `SQL_DIR` | User init scripts directory | `/docker-entrypoint-initdb.d` |
+
+### Initialization & restart behavior
+
+The entrypoint distinguishes between **first run** and **subsequent runs** by
+the presence of a sentinel file at `${ASE_DATA_PATH}/.ase-initialized`.
+
+**First run** (sentinel absent):
+
+1. Wipes any leftover device files / RUN file / cfg from a previous failed
+   attempt.
+2. Runs `srvbuildres` to build master, sysprocs, sysdb and tempdb devices.
+3. Runs `sqllocres` to install the requested locale and charset.
+4. Cleanly stops the server.
+5. Edits `${ASE_DS_NAME}.cfg` to disable async I/O (must be done while the
+   server is stopped — ASE rewrites the cfg from in-memory config on
+   shutdown).
+6. Restarts the server with the patched cfg.
+7. Runs user-supplied `*.sh` / `*.sql` scripts from `${SQL_DIR}` (alphabetical
+   order).
+8. Stops the server cleanly.
+9. Touches the sentinel file. From here on the container takes the fast path.
+
+If any step fails, the entrypoint cleans up partial device files and exits
+non-zero. The next container start re-attempts initialization from a clean
+state.
+
+**Subsequent runs** (sentinel present): only steps 6 and 9 of the above run —
+`startserver` is invoked once and the entrypoint waits on the dataserver
+process while keeping the error log streamed to stdout.
+
+**Graceful shutdown**: SIGTERM and SIGINT trigger an ASE `shutdown` (then
+`shutdown with nowait` then SIGKILL as escalating fallbacks). `tini` is the
+container PID 1, so signals from `docker stop` reach the entrypoint reliably.
 
 ### Language, Charset, and Sort Order
 
