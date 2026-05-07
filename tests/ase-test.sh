@@ -13,6 +13,7 @@ IMAGE_NAME="${IMAGE_NAME:-ase}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 CONTAINER_NAME="ase-test-$$"
 ASE_PORT="${ASE_PORT:-5000}"
+ASE_DS_NAME="${ASE_DS_NAME:-MYSYBASE}"
 ASE_SA_PASSWORD="${ASE_SA_PASSWORD:-TestPassword123}"
 TEST_TIMEOUT="${TEST_TIMEOUT:-180}"
 
@@ -81,6 +82,7 @@ test_container_starts() {
         --name "${CONTAINER_NAME}" \
         -p "${ASE_PORT}:5000" \
         -e ASE_SA_PASSWORD="${ASE_SA_PASSWORD}" \
+        -e ASE_DS_NAME="${ASE_DS_NAME}" \
         "${IMAGE_NAME}:${IMAGE_TAG}"; then
         log_error "Failed to start container"
         return 1
@@ -102,7 +104,7 @@ test_ase_is_ready() {
 
             # Try to connect using isql
             if docker exec "${CONTAINER_NAME}" isql \
-                -S localhost \
+                -S "${ASE_DS_NAME}" \
                 -Usa \
                 -P "${ASE_SA_PASSWORD}" \
                 -b -w 10 <<-EOF 2>/dev/null
@@ -129,7 +131,7 @@ test_basic_query() {
     log_info "Testing basic SQL query execution..."
 
     if ! docker exec "${CONTAINER_NAME}" isql \
-        -S localhost \
+        -S "${ASE_DS_NAME}" \
         -Usa \
         -P "${ASE_SA_PASSWORD}" \
         -b -w 10 <<-EOF >/dev/null 2>&1
@@ -156,7 +158,7 @@ test_database_operations() {
     # Create database
     log_info "Creating test database: ${test_db}"
     if ! docker exec "${CONTAINER_NAME}" isql \
-        -S localhost \
+        -S "${ASE_DS_NAME}" \
         -Usa \
         -P "${ASE_SA_PASSWORD}" \
         -b -w 10 <<-EOF >/dev/null 2>&1
@@ -187,7 +189,7 @@ test_system_procedures() {
     log_info "Testing system stored procedures..."
 
     if ! docker exec "${CONTAINER_NAME}" isql \
-        -S localhost \
+        -S "${ASE_DS_NAME}" \
         -Usa \
         -P "${ASE_SA_PASSWORD}" \
         -b -w 10 <<-EOF >/dev/null 2>&1

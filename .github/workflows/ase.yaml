@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'イメージのタグ (未指定の場合は日付ベース)'
+        description: 'イメージのタグ (未指定の場合はイメージ内から自動抽出)'
         required: false
         type: string
 
@@ -24,18 +24,37 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Generate date-based tag
-        id: date-tag
+      - name: Determine Tag Name
+        id: determine-tag
         run: |
-          if [ "${{ github.event_name }}" == "schedule" ]; then
-            echo "tag=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event_name }}" == "push" ]; then
-            echo "tag=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
-          elif [ -n "${{ inputs.tag_name }}" ]; then
-            echo "tag=${{ inputs.tag_name }}" >> $GITHUB_OUTPUT
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] &&[ -n "${{ inputs.tag_name }}" ]; then
+            # 手動実行(workflow_dispatch)でタグ名が入力された場合はそれを優先
+            TAG="${{ inputs.tag_name }}"
+            echo "Using manual tag: $TAG"
           else
-            echo "tag=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+            # push, schedule, または手動実行で未入力の場合はイメージ内から抽出する
+            echo "Extracting version from Docker image..."
+            
+            # ビルドコンテキストに合わせて ./ase を指定
+            docker build --target version -t ase-version ./ase
+            
+            # CI環境では -it はエラーになるため外し、--rm を付与。余分な改行等のゴミを除去する
+            EXTRACTED=$(docker run --rm ase-version cat /version.txt | grep internal | cut -f 2 -d = | tr -d '\r\n ')
+            
+            if [ -z "$EXTRACTED" ]; then
+              echo "Error: Version extraction failed."
+              exit 1
+            fi
+            
+            TAG="$EXTRACTED"
+            echo "Extracted version tag: $TAG"
+            
+            # 抽出用の一時イメージをクリーンアップ
+            docker rmi ase-version || true
           fi
+          
+          # 次のステップで使えるように output にセット
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
       - name: Generate lowercase repository name
         id: repo-name
@@ -62,7 +81,7 @@ jobs:
           context: ./ase
           platforms: linux/amd64
           push: true
-          tags: ghcr.io/${{ steps.repo-name.outputs.owner }}/ase:${{ steps.date-tag.outputs.tag }}
+          tags: ghcr.io/${{ steps.repo-name.outputs.owner }}/ase:${{ steps.determine-tag.outputs.tag }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
